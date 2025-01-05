@@ -8,41 +8,102 @@ import { ToastAction } from "./ui/toast";
 import { Input } from "./ui/input";
 
 export default function TodoList({ taskobj }: { taskobj: Task }) {
-  const { task, id, completed } = taskobj;
-  const { tasks, removeTask, doneTask, addTask, updateTask } = useTaskStore();
+  const { title, _id, completed } = taskobj;
+  const { removeTask, doneTask, addTask, updateTask } = useTaskStore();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [updatedTask, setUpdatedTask] = useState(task);
+  const [updatedTask, setUpdatedTask] = useState(title);
 
-  const handleRemoveTask = () => {
-    const removedTask = tasks.find((task) => task.id === id);
+  const handleRemoveTask = async () => {
+    try {
+      const res = await fetch(`/api/todos?id=${_id}`, {
+        method: "DELETE",
+      });
 
-    if (!removedTask) return;
+      if (!res.ok) {
+        throw new Error("Failed to remove task");
+      }
 
-    removeTask(id);
-    toast({
-      title: "Task removed",
-      description: "Task removed successfully",
-      action: (
-        <ToastAction altText="Undo" onClick={() => addTask(removedTask)}>
-          Undo
-        </ToastAction>
-      ),
-    });
+      removeTask(_id);
+      toast({
+        title: "Task removed",
+        description: "Task removed successfully",
+        action: (
+          <ToastAction altText="Undo" onClick={() => addTask(taskobj)}>
+            Undo
+          </ToastAction>
+        ),
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove task",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDoneTask = () => {
-    doneTask(id);
+
+  const handleDoneTask = async () => {
+    try {
+      const res = await fetch(`/api/todos`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: _id, completed: !completed }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update task");
+      }
+
+      doneTask(_id);
+      toast({
+        title: "Task updated",
+        description: "Task completion status updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpdateTask = () => {
-    updateTask(id, updatedTask);
-    setIsEditing(false);
-    toast({
-      title: "Task updated",
-      description: "Task updated successfully",
-    });
+  const handleUpdateTask = async () => {
+    try {
+      const res = await fetch(`/api/todos`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: _id, title: updatedTask }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update task");
+      }
+
+      const { task }: { task: Task } = await res.json(); // Get the updated task from the response
+
+      updateTask(task._id, task.title); // Update the local store with the new task
+
+      setIsEditing(false);
+      toast({
+        title: "Task updated",
+        description: "Task updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    }
   };
+
 
   return (
     <li
@@ -66,7 +127,7 @@ export default function TodoList({ taskobj }: { taskobj: Task }) {
               completed ? "" : " hover:line-clamp-none "
             }`}
           >
-            {task}
+            {title}
           </h4>
         )}
       </div>

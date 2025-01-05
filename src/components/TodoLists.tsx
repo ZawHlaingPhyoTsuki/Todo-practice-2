@@ -1,20 +1,34 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import TodoList from "./TodoList";
 import useTaskStore from "@/store/useTaskStore";
 import { Task } from "@/types/todo";
 import Image from "next/image";
 
 export default function TodoLists() {
-    const { tasks } = useTaskStore();
-    
+  const { tasks, addTask } = useTaskStore();
+  // Fetch tasks from the API
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const res = await fetch("/api/todos");
+      const data = await res.json();
+      if (data.tasks) {
+        data.tasks.forEach((task: Task) => addTask(task));
+      }
+    };
+
+    fetchTasks();
+  }, [addTask]);
+
+  
+
   return (
     <>
       {tasks.length > 0 ? (
         <ul className="flex flex-col gap-2 w-full h-full">
           {tasks.map((taskobj: Task) => (
-            <TodoList key={taskobj.id} taskobj={taskobj} />
+            <TodoList key={taskobj?._id} taskobj={taskobj} />
           ))}
         </ul>
       ) : (

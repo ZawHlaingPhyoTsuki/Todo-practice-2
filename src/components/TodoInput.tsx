@@ -13,12 +13,13 @@ export default function TodoInput() {
   const { addTask } = useTaskStore();
   const { toast } = useToast();
 
+  // Handle input change
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // console.log(event.target.value);
     setNewTask(event.target.value);
   };
 
-  const handleAddTask = () => {
+  // Handle adding a new task
+  const handleAddTask = async () => {
     if (!newTask) {
       toast({
         title: "Empty Task",
@@ -27,26 +28,61 @@ export default function TodoInput() {
       });
       return;
     }
-    const task : Task = { id: Date.now(), task: newTask, completed: false };
-    addTask(task);
-    setNewTask("");
-    toast({
-      title: "Task Added",
-      description: "Task added successfully",
-    });
+
+    try {
+      // Send a POST request to the API
+      const res = await fetch("/api/todos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task: newTask }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to add task");
+      }
+
+      const data = await res.json();
+      const task: Task = {
+        _id: data.newTask._id,
+        title: data.newTask.title,
+        completed: data.newTask.completed,
+      };
+
+      // Update the local state
+      addTask(task);
+
+      // Reset input field
+      setNewTask("");
+
+      // Show success toast
+      toast({
+        title: "Task Added",
+        description: "Task added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="flex flex-col gap-2 w-full px-1">
       <Label htmlFor="new-task">New Task</Label>
-      <div className="flex  gap-4">
+      <div className="flex gap-4">
         <Input
           id="new-task"
           placeholder="Add a new task"
           value={newTask}
           onChange={handleOnChange}
         />
-        <Button className="font-bold" onClick={handleAddTask}>Add Task</Button>
+        <Button className="font-bold" onClick={handleAddTask}>
+          Add Task
+        </Button>
       </div>
     </div>
   );

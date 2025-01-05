@@ -1,0 +1,20 @@
+[
+  { "id": 1, "task": "Finish JavaScript Cash Register App", "completed": true },
+  {
+    "id": 2,
+    "task": "Study for 'Creative Thinking' Class Exam",
+    "completed": false
+  },
+  { "id": 3, "task": "Set Up VirtualBox for Arch Linux", "completed": false },
+  {
+    "id": 4,
+    "task": "Research Marketing Strategies for Cybercafe",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "task": "Work on Pokémon Search App (freeCodeCamp Project)",
+    "completed": false
+  }
+]
+
