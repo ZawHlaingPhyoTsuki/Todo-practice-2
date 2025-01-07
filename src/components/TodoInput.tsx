@@ -7,11 +7,13 @@ import { Button } from "./ui/button";
 import useTaskStore from "@/store/useTaskStore";
 import { useToast } from "@/hooks/use-toast";
 import { Task } from "@/types/todo";
+import { useRouter } from "next/navigation";
 
 export default function TodoInput() {
   const [newTask, setNewTask] = useState("");
   const { addTask } = useTaskStore();
   const { toast } = useToast();
+  const router = useRouter();
 
   // Handle input change
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +57,9 @@ export default function TodoInput() {
 
       // Reset input field
       setNewTask("");
+
+      // Refresh the page
+      router.refresh();
 
       // Show success toast
       toast({

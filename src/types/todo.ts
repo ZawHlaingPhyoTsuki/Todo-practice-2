@@ -11,3 +11,8 @@ export interface TaskStore {
     doneTask: (id: number) => void;
     updateTask: (id: number, task: string) => void;
 }
+
+// export interface TaskApiResponse {
+//     message: string;
+//     tasks?: Task[];
+// }

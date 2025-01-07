@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
@@ -6,6 +8,7 @@ import { Task } from "@/types/todo";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "./ui/toast";
 import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
 
 export default function TodoList({ taskobj }: { taskobj: Task }) {
   const { title, _id, completed } = taskobj;
@@ -13,6 +16,7 @@ export default function TodoList({ taskobj }: { taskobj: Task }) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTask, setUpdatedTask] = useState(title);
+  const router = useRouter()
 
   const handleRemoveTask = async () => {
     try {
@@ -25,6 +29,10 @@ export default function TodoList({ taskobj }: { taskobj: Task }) {
       }
 
       removeTask(_id);
+
+      // refresh the page
+      router.refresh()
+
       toast({
         title: "Task removed",
         description: "Task removed successfully",
@@ -59,6 +67,10 @@ export default function TodoList({ taskobj }: { taskobj: Task }) {
       }
 
       doneTask(_id);
+
+      // refresh the page
+      router.refresh()
+
       toast({
         title: "Task updated",
         description: "Task completion status updated successfully",
@@ -89,6 +101,9 @@ export default function TodoList({ taskobj }: { taskobj: Task }) {
       const { task }: { task: Task } = await res.json(); // Get the updated task from the response
 
       updateTask(task._id, task.title); // Update the local store with the new task
+
+      // refresh the page
+      router.refresh()
 
       setIsEditing(false);
       toast({
